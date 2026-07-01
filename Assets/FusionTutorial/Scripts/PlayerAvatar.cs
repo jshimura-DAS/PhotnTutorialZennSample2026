@@ -9,10 +9,15 @@ public class PlayerAvatar : NetworkBehaviour
     public NetworkString<_16> NickName { get; set; }
 
     private NetworkCharacterController characterController;
+    private NetworkMecanimAnimator networkAnimator;
+    
+    private float defaultMaxSpeed;
+    private float sprintMaxSpeed;
 
     public override void Spawned()
     {
         characterController = GetComponent<NetworkCharacterController>();
+        networkAnimator = GetComponentInChildren<NetworkMecanimAnimator>();
 
         var view = GetComponent<PlayerAvatarView>();
         // プレイヤー名をテキストに反映する
@@ -22,6 +27,10 @@ public class PlayerAvatar : NetworkBehaviour
         {
             view.MakeCameraTarget();
         }
+        
+        // デフォルトと走行時の最大速度を保存
+        defaultMaxSpeed = characterController.maxSpeed;
+        sprintMaxSpeed = defaultMaxSpeed * 6f;
     }
 
     public override void FixedUpdateNetwork()
@@ -35,12 +44,27 @@ public class PlayerAvatar : NetworkBehaviour
             0f,
             (keyboard.wKey.isPressed ? 1 : 0) - (keyboard.sKey.isPressed ? 1 : 0)
         );
-        // characterController.Move(inputDirection);
+        
+        // 左Shift キー押下時に最大速度を増加
+        bool isSprinting = keyboard.leftShiftKey.isPressed;
+        characterController.maxSpeed = isSprinting ? sprintMaxSpeed : defaultMaxSpeed;
+        
         characterController.Move(cameraRotation * inputDirection);
+        
         // ジャンプ
         if (keyboard.spaceKey.isPressed)
         {
             characterController.Jump();
         }
+        
+        // アニメーション（ここでは説明を簡単にするため、かなり大雑把な設定になっています）
+        var animator = networkAnimator.Animator;
+        var grounded = characterController.Grounded;
+        var vy = characterController.Velocity.y;
+        animator.SetFloat("Speed", characterController.Velocity.magnitude);
+        animator.SetBool("Jump", !grounded && vy > 4f);
+        animator.SetBool("Grounded", grounded);
+        animator.SetBool("FreeFall", !grounded && vy < -4f);
+        animator.SetFloat("MotionSpeed", 1f);
     }
 }
