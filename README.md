@@ -1,6 +1,7 @@
 # Photon Fusion チュートリアル(Zenn版） — シーン起動から入力でプレイヤーが動くまで
 
 このリポジトリは Photon Fusion 2 を用いたチュートリアル実装です。ここでは、Unity で Scene を起動してからローカルプレイヤーがキー入力で動作するまでの一連の流れを簡潔にまとめます。実装ファイルへの参照と、Photon Fusion の公式ドキュメントへのリンクを含みます。
+https://zenn.dev/o8que/books/photon-fusion
 
 ---
 
